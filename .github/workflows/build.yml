@@ -5,6 +5,9 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -21,14 +24,23 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.7'
 
       - name: Build Debug APK
-        run: gradle assembleDebug
+        run: ./gradlew assembleDebug
 
-      - name: Upload APK
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: EdgeLight-APK
           path: app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Auto Publish to Latest Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk EdgeLight.apk
+          if gh release view latest >/dev/null 2>&1; then
+            gh release upload latest EdgeLight.apk --clobber
+          else
+            gh release create latest EdgeLight.apk --title "Edge Light Latest" --notes "Latest automatic build"
+          fi
