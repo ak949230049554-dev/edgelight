@@ -27,7 +27,7 @@ jobs:
 
       - name: Build Debug APK
         run: |
-          gradle wrapper --gradle-version 8.5 --distribution-type bin || true
+          gradle wrapper --gradle-version 8.7 --distribution-type bin || true
           if [ -f ./gradlew ]; then
             chmod +x ./gradlew
             ./gradlew assembleDebug
