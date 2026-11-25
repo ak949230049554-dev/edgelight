@@ -23,7 +23,11 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import android.app.DownloadManager;
+import android.database.Cursor;
+import android.os.Handler;
+import android.os.Looper;
+import android.widget.ProgressBar;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
