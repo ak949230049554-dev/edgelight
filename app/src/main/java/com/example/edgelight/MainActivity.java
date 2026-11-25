@@ -262,5 +262,27 @@ public class MainActivity extends Activity {
             statusText.setText("Status: BAND HAI");
             btnToggle.setText("LIGHT ON KAREIN");
         }
+    }private ToneGenerator toneGen;
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            try {
+                if (toneGen == null) {
+                    toneGen = new ToneGenerator(AudioManager.STREAM_MUSIC, 80);
+                }
+                toneGen.startTone(ToneGenerator.TONE_PROP_BEEP, 45);
+            } catch (Exception ignored) {}
+        }
+        return super.dispatchTouchEvent(ev);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (toneGen != null) {
+            toneGen.release();
+            toneGen = null;
+        }
     }
 }
