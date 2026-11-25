@@ -1,6 +1,9 @@
 package com.example.edgelight;
 
 import android.Manifest;
+import android.media.AudioManager;
+import android.media.ToneGenerator;
+import android.view.MotionEvent;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Notification;
@@ -30,7 +33,7 @@ import java.net.URL;
 
 public class MainActivity extends Activity {
 
-    private static final int CURRENT_VERSION = 1;
+    private static final int CURRENT_VERSION = 3;
     private static final String UPDATE_URL = "https://raw.githubusercontent.com/ak949230049554-dev/edgelight/main/update.json";
 
     private Button btnPermission, btnToggle;
