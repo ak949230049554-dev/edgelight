@@ -1,46 +1,7 @@
-name: Build EdgeLight APK
-
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
-
-permissions:
-  contents: write
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Java 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug
-
-      - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: EdgeLight-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
-
-      - name: Auto Publish to Latest Release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+- name: Build Debug APK
         run: |
-          cp app/build/outputs/apk/debug/app-debug.apk EdgeLight.apk
-          if gh release view latest >/dev/null 2>&1; then
-            gh release upload latest EdgeLight.apk --clobber
-          else
-            gh release create latest EdgeLight.apk --title "Edge Light Latest" --notes "Latest automatic build"
+          if [ ! -f ./gradlew ]; then
+            gradle wrapper --gradle-version 8.5 --distribution-type bin
           fi
+          chmod +x ./gradlew
+          ./gradlew assembleDebug
