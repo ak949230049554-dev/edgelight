@@ -11,7 +11,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
+      - name: Decode Keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > app/edgelight.jks
       - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
