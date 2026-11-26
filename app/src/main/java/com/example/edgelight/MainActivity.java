@@ -124,6 +124,23 @@ public class MainActivity extends Activity {
                 Toast.makeText(this, "App pehle se updated hai! Koi naya update nahi hai.", Toast.LENGTH_SHORT).show();
             }
         });
+        Button btnAll = findViewById(R.id.btnAllEffects);
+        btnAll.setOnClickListener(v -> {
+            String[] options = {
+                "⚡ Normal Neon Border",
+                "❤️ Dil Blink (Battery Saver)",
+                "✨ Star Twinkle",
+                "🔥 Fire Edge"
+            };
+
+            new AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+                .setTitle("✨ Border Style चुनें")
+                .setItems(options, (dialog, which) -> {
+                    SharedPreferences prefs = getSharedPreferences("EdgePrefs", MODE_PRIVATE);
+                    prefs.edit().putInt("borderStyle", which).apply();
+                })
+                .show();
+        });
 
         findViewById(R.id.btnRed).setOnClickListener(v -> setLightColor(Color.RED, false, "Red"));
         findViewById(R.id.btnGreen).setOnClickListener(v -> setLightColor(Color.GREEN, false, "Green"));
