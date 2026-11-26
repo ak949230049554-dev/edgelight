@@ -1,0 +1,25 @@
+name: Create Keystore
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  create-key:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate Keystore
+        run: |
+          keytool -genkey -v -keystore app/edgelight.jks -keyalg RSA -keysize 2048 -validity 10000 -alias edgelight -storepass 123456 -keypass 123456 -dname "CN=EdgeLight, OU=Dev, O=EdgeLight, L=Bihar, S=Bihar, C=IN"
+
+      - name: Save Keystore to Repo
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git add app/edgelight.jks
+          git commit -m "Add fixed keystore"
+          git push
