@@ -10,8 +10,27 @@ android {
         applicationId "com.example.edgelight"
         minSdk 24
         targetSdk 34
-        versionCode 1
-        versionName "1.0"
+        versionCode 4
+        versionName "4.0"
+    }
+
+    signingConfigs {
+        release {
+            storeFile file("edgelight.jks")
+            storePassword "123456"
+            keyAlias "edgelight"
+            keyPassword "123456"
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.release
+        }
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+        }
     }
 
     compileOptions {
