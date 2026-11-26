@@ -57,6 +57,10 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        java.io.File oldApk = new java.io.File(getCacheDir(), "EdgeLight_Update.apk");
+        if (oldApk.exists()) {
+            oldApk.delete();
+        }
 // --- 1-Click Neon Presets Bar (Version 5) ---
         LinearLayout presetRow = new LinearLayout(this);
         presetRow.setOrientation(LinearLayout.HORIZONTAL);
@@ -237,7 +241,7 @@ public class MainActivity extends Activity {
             manager.createNotificationChannel(channel);
         }
 
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl));
+        Intent intent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(
                 this, 2, intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
 
@@ -331,5 +335,136 @@ public class MainActivity extends Activity {
             toneGen.release();
             toneGen = null;
         }
+    }
+    private boolean isDownloading = false;
+
+    private void downloadAndInstallApk(final String apkUrl) {
+        if (apkUrl == null || apkUrl.isEmpty()) return;
+
+        if (isDownloading) {
+            android.widget.Toast.makeText(this, "Update pehle se download ho raha hai...", android.widget.Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            if (!getPackageManager().canRequestPackageInstalls()) {
+                android.widget.Toast.makeText(this, "Pehle 'Allow from this source' ON karein, fir dubara Update dabayein", android.widget.Toast.LENGTH_LONG).show();
+                Intent permIntent = new Intent(
+                        android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                        android.net.Uri.parse("package:" + getPackageName())
+                );
+                startActivity(permIntent);
+                return;
+            }
+        }
+
+        isDownloading = true;
+
+        android.widget.LinearLayout box = new android.widget.LinearLayout(this);
+        box.setOrientation(android.widget.LinearLayout.VERTICAL);
+        box.setPadding(50, 40, 50, 40);
+
+        final android.widget.TextView percentText = new android.widget.TextView(this);
+        percentText.setText("Updating: 0%");
+        percentText.setTextSize(16);
+        percentText.setPadding(0, 0, 0, 20);
+
+        final android.widget.ProgressBar progressBar = new android.widget.ProgressBar(
+                this, null, android.R.attr.progressBarStyleHorizontal);
+        progressBar.setMax(100);
+        progressBar.setProgress(0);
+
+        box.addView(percentText);
+        box.addView(progressBar);
+
+        final AlertDialog progressDialog = new AlertDialog.Builder(this)
+                .setTitle("App Update Ho Raha Hai")
+                .setView(box)
+                .setCancelable(false)
+                .create();
+        progressDialog.show();
+
+        new Thread(() -> {
+            try {
+                String finalUrl = apkUrl;
+                java.net.HttpURLConnection conn = null;
+                for (int i = 0; i < 5; i++) {
+                    conn = (java.net.HttpURLConnection) new java.net.URL(finalUrl).openConnection();
+                    conn.setInstanceFollowRedirects(true);
+                    conn.setConnectTimeout(15000);
+                    conn.setReadTimeout(15000);
+                    int status = conn.getResponseCode();
+                    if (status == java.net.HttpURLConnection.HTTP_MOVED_TEMP
+                            || status == java.net.HttpURLConnection.HTTP_MOVED_PERM
+                            || status == java.net.HttpURLConnection.HTTP_SEE_OTHER
+                            || status == 307 || status == 308) {
+                        finalUrl = conn.getHeaderField("Location");
+                        conn.disconnect();
+                    } else {
+                        break;
+                    }
+                }
+
+                int fileLength = conn.getContentLength();
+                final java.io.File apkFile = new java.io.File(getCacheDir(), "EdgeLight_Update.apk");
+                if (apkFile.exists()) {
+                    apkFile.delete();
+                }
+
+                java.io.InputStream input = conn.getInputStream();
+                java.io.FileOutputStream output = new java.io.FileOutputStream(apkFile);
+
+                byte[] data = new byte[4096];
+                long total = 0;
+                int count;
+                int lastPercent = -1;
+
+                while ((count = input.read(data)) != -1) {
+                    total += count;
+                    output.write(data, 0, count);
+                    if (fileLength > 0) {
+                        final int progress = (int) (total * 100 / fileLength);
+                        if (progress != lastPercent) {
+                            lastPercent = progress;
+                            runOnUiThread(() -> {
+                                progressBar.setProgress(progress);
+                                percentText.setText("Updating: " + progress + "%");
+                            });
+                        }
+                    } else {
+                        final long kb = total / 1024;
+                        runOnUiThread(() -> percentText.setText("Downloading: " + kb + " KB"));
+                    }
+                }
+
+                output.flush();
+                output.close();
+                input.close();
+                conn.disconnect();
+
+                runOnUiThread(() -> {
+                    progressBar.setProgress(100);
+                    percentText.setText("Updating: 100%");
+                    progressDialog.dismiss();
+                    isDownloading = false;
+
+                    android.net.Uri apkUri = androidx.core.content.FileProvider.getUriForFile(
+                            MainActivity.this,
+                            getPackageName() + ".provider",
+                            apkFile
+                    );
+                    Intent installIntent = new Intent(Intent.ACTION_VIEW);
+                    installIntent.setDataAndType(apkUri, "application/vnd.android.package-archive");
+                    installIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(installIntent);
+                });
+            } catch (final Exception e) {
+                runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    isDownloading = false;
+                    android.widget.Toast.makeText(MainActivity.this, "Update fail: " + e.getMessage(), android.widget.Toast.LENGTH_LONG).show();
+                });
+            }
+        }).start();
     }
 }
