@@ -64,7 +64,7 @@ public class EdgeLightService extends Service {
                             | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                     PixelFormat.TRANSLUCENT
             );
-
+params.alpha = 0.79f;
             // Poora Fullscreen (Notch aur Camera ke upar bhi)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 params.layoutInDisplayCutoutMode =
