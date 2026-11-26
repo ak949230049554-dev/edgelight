@@ -220,7 +220,7 @@ public class MainActivity extends Activity {
                 .setTitle(title)
                 .setMessage(message)
                 .setCancelable(true)
-                .setPositiveButton("Update Karein", (dialog, which) -> openDownloadLink(downloadUrl))
+                .setPositiveButton("Update Karein", (dialog, which) -> downloadAndInstallApk(downloadUrl))
                 .setNeutralButton("Baad Me", null)
                 .setNegativeButton("Hata Dein (Skip)", (dialog, which) -> {
                     SharedPreferences prefs = getSharedPreferences("EdgeLightPrefs", MODE_PRIVATE);
