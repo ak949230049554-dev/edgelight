@@ -48,7 +48,7 @@ public class MainActivity extends Activity {
     private boolean isMultiColor = true;
 
     private boolean isUpdateAvailable = false;
-    private int latestVersionFound = 1;
+    private int latestVersionFound = 5;
     private String updateTitle = "Naya Update Available Hai!";
     private String updateMessage = "Naye features ke liye app update karein.";
     private String updateDownloadUrl = "";
@@ -57,7 +57,50 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+// --- 1-Click Neon Presets Bar (Version 5) ---
+        LinearLayout presetRow = new LinearLayout(this);
+        presetRow.setOrientation(LinearLayout.HORIZONTAL);
+        presetRow.setPadding(16, 16, 16, 30);
 
+        String[] presetNames = {"Blood Red", "Cyber Blue", "Toxic Green"};
+        int[] presetColors = {
+                Color.parseColor("#FF003C"),
+                Color.parseColor("#00F0FF"),
+                Color.parseColor("#39FF14")
+        };
+
+        for (int i = 0; i < presetNames.length; i++) {
+            final int chosenColor = presetColors[i];
+            final String chosenName = presetNames[i];
+
+            Button btn = new Button(this);
+            btn.setText(chosenName);
+            btn.setTextColor(Color.BLACK);
+            btn.setBackgroundColor(chosenColor);
+
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f
+            );
+            lp.setMargins(8, 0, 8, 0);
+            btn.setLayoutParams(lp);
+
+            btn.setOnClickListener(v -> {
+                getSharedPreferences("EdgeLightPrefs", MODE_PRIVATE)
+                        .edit()
+                        .putInt("edge_color", chosenColor)
+                        .apply();
+                Toast.makeText(this, chosenName + " Activated!", Toast.LENGTH_SHORT).show();
+            });
+
+            presetRow.addView(btn);
+        }
+
+        android.widget.FrameLayout.LayoutParams barParams = new android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                android.widget.FrameLayout.LayoutParams.WRAP_CONTENT,
+                android.view.Gravity.BOTTOM
+        );
+        addContentView(presetRow, barParams);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 101);
