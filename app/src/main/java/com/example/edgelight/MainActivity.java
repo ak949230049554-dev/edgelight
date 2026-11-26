@@ -37,7 +37,7 @@ import java.net.URL;
 
 public class MainActivity extends Activity {
 
-    private static final int CURRENT_VERSION = 6;
+    private static final int CURRENT_VERSION = 7;
     private static final String UPDATE_URL = "https://raw.githubusercontent.com/ak949230049554-dev/edgelight/main/update.json";
 
     private Button btnPermission, btnToggle;
