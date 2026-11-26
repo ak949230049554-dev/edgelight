@@ -6,10 +6,12 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.RectF;
 import android.graphics.SweepGradient;
@@ -64,7 +66,8 @@ public class EdgeLightService extends Service {
                             | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                     PixelFormat.TRANSLUCENT
             );
-params.alpha = 0.79f;
+            params.alpha = 0.70f;
+
             // Poora Fullscreen (Notch aur Camera ke upar bhi)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 params.layoutInDisplayCutoutMode =
@@ -122,14 +125,15 @@ params.alpha = 0.79f;
         private float angle = 0f;
         private float pulsePhase = 0f;
         private final float density;
-private boolean styleBlinkOn = true;
+        private boolean styleBlinkOn = true;
+
         // Cinematic Cyberpunk & Aurora Neon Colors
         private final int[] cinematicColors = new int[]{
                 Color.parseColor("#FF007F"), // Neon Pink
                 Color.parseColor("#7928CA"), // Deep Purple
-                Color.parseColor("#00F0FF"), // Electric Cyan
-                Color.parseColor("#0066FF"), // Cinema Blue
-                Color.parseColor("#FF2A00"), // Neon Red-Orange
+                Color.parseColor("#00DFD8"), // Electric Cyan
+                Color.parseColor("#00FF87"), // Emerald Mint
+                Color.parseColor("#FF4D4D"), // Neon Red-Orange
                 Color.parseColor("#FF007F")
         };
 
@@ -170,6 +174,47 @@ private boolean styleBlinkOn = true;
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
 
+            if (isShown()) {
+                SharedPreferences prefs = getContext().getSharedPreferences("EdgePrefs", Context.MODE_PRIVATE);
+                int borderStyle = prefs.getInt("borderStyle", 0); // 0=Normal, 1=Dil, 2=Star, 3=Fire
+
+                if (borderStyle > 0) {
+                    styleBlinkOn = !styleBlinkOn;
+
+                    Paint stylePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                    stylePaint.setStyle(Paint.Style.FILL);
+
+                    if (borderStyle == 1) {
+                        stylePaint.setColor(Color.parseColor("#FF1744")); // Neon Red Dil
+                    } else if (borderStyle == 2) {
+                        stylePaint.setColor(Color.parseColor("#FFD600")); // Gold Star
+                    } else {
+                        stylePaint.setColor(Color.parseColor("#FF6D00")); // Orange Fire
+                    }
+                    stylePaint.setAlpha(styleBlinkOn ? 255 : 75);
+
+                    float scale = (styleBlinkOn ? 1.25f : 0.85f) * (density * 0.65f);
+                    int w = getWidth();
+                    int h = getHeight();
+                    float margin = 20f * density;
+                    int gap = (int) (42f * density);
+
+                    // Upar aur neeche border
+                    for (float x = margin * 1.5f; x < w - margin; x += gap) {
+                        drawCustomShape(canvas, borderStyle, x, margin, scale, stylePaint);
+                        drawCustomShape(canvas, borderStyle, x, h - margin, scale, stylePaint);
+                    }
+                    // Left aur right border
+                    for (float y = margin * 3.2f; y < h - margin * 2.5f; y += gap) {
+                        drawCustomShape(canvas, borderStyle, margin, y, scale, stylePaint);
+                        drawCustomShape(canvas, borderStyle, w - margin, y, scale, stylePaint);
+                    }
+
+                    postInvalidateDelayed(350);
+                    return;
+                }
+            }
+
             float cornerRadius = 36f * density;
             pulsePhase += 0.06f;
             float pulse = (float) (0.72 + 0.28 * Math.sin(pulsePhase));
@@ -203,6 +248,39 @@ private boolean styleBlinkOn = true;
             canvas.drawRoundRect(rectF, cornerRadius, cornerRadius, corePaint);
 
             postInvalidateOnAnimation();
+        }
+
+        private void drawCustomShape(Canvas canvas, int style, float cx, float cy, float scale, Paint paint) {
+            canvas.save();
+            canvas.translate(cx, cy);
+            canvas.scale(scale, scale);
+            Path path = new Path();
+
+            if (style == 1) {
+                // Real Heart Shape
+                path.moveTo(0, 14);
+                path.cubicTo(-20, -4, -20, -20, 0, -9);
+                path.cubicTo(20, -20, 20, -4, 0, 14);
+            } else if (style == 2) {
+                // Star Shape
+                path.moveTo(0, -17);
+                path.lineTo(5, -5);
+                path.lineTo(17, 0);
+                path.lineTo(5, 5);
+                path.lineTo(0, 17);
+                path.lineTo(-5, 5);
+                path.lineTo(-17, 0);
+                path.lineTo(-5, -5);
+                path.close();
+            } else {
+                // Fire Flame Shape
+                path.moveTo(0, -18);
+                path.cubicTo(13, -5, 15, 11, 0, 16);
+                path.cubicTo(-15, 11, -13, -5, 0, -18);
+            }
+
+            canvas.drawPath(path, paint);
+            canvas.restore();
         }
     }
 }
