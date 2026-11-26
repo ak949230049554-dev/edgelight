@@ -37,7 +37,7 @@ import java.net.URL;
 
 public class MainActivity extends Activity {
 
-    private static final int CURRENT_VERSION = 5;
+    private static final int CURRENT_VERSION = 6;
     private static final String UPDATE_URL = "https://raw.githubusercontent.com/ak949230049554-dev/edgelight/main/update.json";
 
     private Button btnPermission, btnToggle;
@@ -48,7 +48,7 @@ public class MainActivity extends Activity {
     private boolean isMultiColor = true;
 
     private boolean isUpdateAvailable = false;
-    private int latestVersionFound = 5;
+    private int latestVersionFound = 6;
     private String updateTitle = "Naya Update Available Hai!";
     private String updateMessage = "Naye features ke liye app update karein.";
     private String updateDownloadUrl = "";
@@ -61,7 +61,7 @@ public class MainActivity extends Activity {
         if (oldApk.exists()) {
             oldApk.delete();
         }
-// --- 1-Click Neon Presets Bar (Version 5) ---
+// --- 1-Click Neon Presets Bar (Version 6) ---
         LinearLayout presetRow = new LinearLayout(this);
         presetRow.setOrientation(LinearLayout.HORIZONTAL);
         presetRow.setPadding(16, 16, 16, 30);
