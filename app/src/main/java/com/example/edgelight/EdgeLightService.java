@@ -122,7 +122,7 @@ params.alpha = 0.79f;
         private float angle = 0f;
         private float pulsePhase = 0f;
         private final float density;
-
+private boolean styleBlinkOn = true;
         // Cinematic Cyberpunk & Aurora Neon Colors
         private final int[] cinematicColors = new int[]{
                 Color.parseColor("#FF007F"), // Neon Pink
