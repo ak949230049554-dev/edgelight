@@ -4,7 +4,16 @@
     android:layout_height="match_parent"
     android:background="#000000"
     android:padding="20dp">
-
+<!-- Upar Left Side me All Button -->
+    <Button
+        android:id="@+id/btnAllEffects"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:text="All"
+        android:backgroundTint="#FF0033"
+        android:textColor="#FFFFFF" />
     <!-- Upar Right Side me Update Button aur Laal Bindu -->
     <LinearLayout
         android:id="@+id/btnTopUpdate"
